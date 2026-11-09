@@ -1,0 +1,125 @@
+name: D.J. Trust - Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # ============================================================================
+  # Frontend Validation Pipeline (React 19 + TypeScript + Vite + Tailwind CSS)
+  # ============================================================================
+  frontend-ci:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: Frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20 (LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Install dependencies (clean install)
+        run: npm ci
+
+      - name: Run code linter
+        run: npm run lint
+
+      - name: Run TypeScript type check
+        run: npx tsc -b
+
+      - name: Run unit tests (if configured)
+        run: |
+          if npm run | grep -E "^  test\b" > /dev/null 2>&1; then
+            echo "Running frontend unit tests..."
+            npm test --if-present
+          else
+            echo "No frontend unit test script defined in package.json. Skipping test execution."
+          fi
+
+      - name: Build frontend for production
+        run: npm run build
+
+      - name: Verify frontend build artifacts
+        run: |
+          if [ ! -f "dist/index.html" ]; then
+            echo "::error::Production build failed: dist/index.html not found!"
+            exit 1
+          fi
+          echo "Frontend build successfully verified. Artifacts:"
+          ls -la dist/
+
+  # ============================================================================
+  # Backend Validation Pipeline (ASP.NET Core / .NET 10 Web API)
+  # ============================================================================
+  backend-ci:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('Backend/DjTrust.Api.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore NuGet dependencies
+        run: dotnet restore Backend/DjTrust.Api.csproj
+
+      - name: Build backend in Release configuration
+        run: dotnet build Backend/DjTrust.Api.csproj --configuration Release --no-restore
+
+      - name: Discover and run backend tests (if present)
+        run: |
+          TEST_PROJECTS=$(find . -name "*[Tt]est*.csproj" -o -name "*[Tt]ests*.csproj")
+          if [ -n "$TEST_PROJECTS" ]; then
+            echo "Discovered test project(s): $TEST_PROJECTS"
+            for proj in $TEST_PROJECTS; do
+              echo "Executing tests for $proj..."
+              dotnet test "$proj" --configuration Release --no-build --no-restore --verbosity normal
+            done
+          else
+            echo "No test projects (*Test*.csproj) detected in repository. Skipping test run."
+          fi
+
+      - name: Verify backend build output
+        run: |
+          ASSEMBLY="Backend/bin/Release/net10.0/DjTrust.Api.dll"
+          if [ ! -f "$ASSEMBLY" ]; then
+            echo "::error::Backend build output missing: $ASSEMBLY!"
+            exit 1
+          fi
+          echo "Backend build successfully verified: $ASSEMBLY created."
+

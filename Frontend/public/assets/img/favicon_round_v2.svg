@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Solid White Circle Background -->
+  <circle cx="256" cy="256" r="250" fill="white" />
+  
+  <!-- Logo (Centered and adjusted for the circle) -->
+  <g transform="translate(85, 110) scale(0.7)">
+    <path d="M120 180 v180 h40 v-180 a80 80 0 1 1 160 0 v180 h40 v-180 a120 120 0 1 0 -240 0 z" fill="#003d8f"/>
+    <circle cx="440" cy="180" r="40" fill="#d32f2f"/>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <!-- Full white background circle to edges -->
+  <circle cx="250" cy="250" r="250" fill="white" />
+  
+  <!-- Minimalist 'Dj' Text - High Legibility -->
+  <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" 
+        style="font-family: Arial, sans-serif; font-weight: 900; font-size: 280px; fill: #003d8f;">Dj</text>
+        
+  <!-- Small Red Dot from brand identity -->
+  <circle cx="395" cy="180" r="35" fill="#d32f2f" />
+</svg>

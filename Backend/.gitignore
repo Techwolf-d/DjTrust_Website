@@ -1,0 +1,15 @@
+# Environment files containing sensitive ports or credentials
+.env
+*.env.local
+
+# Build outputs
+bin/
+obj/
+publish/
+
+# IDE files
+.vs/
+.idea/
+*.user
+*.suo
+
