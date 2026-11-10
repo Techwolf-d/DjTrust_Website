@@ -22,6 +22,9 @@ interface LoanModalProps {
   onClose: () => void;
 }
 
+const CURRENT_YEAR = new Date().getFullYear();
+const REG_YEARS: number[] = Array.from({ length: CURRENT_YEAR - 2015 + 1 }, (_, i) => CURRENT_YEAR - i);
+
 export const LoanModal: React.FC<LoanModalProps> = ({ isOpen, onClose }) => {
   useBodyScrollLock(isOpen);
 
@@ -51,41 +54,47 @@ export const LoanModal: React.FC<LoanModalProps> = ({ isOpen, onClose }) => {
 
   // Load makes from database when modal opens
   useEffect(() => {
+    let isMounted = true;
     if (isOpen) {
-      setIsLoadingMakes(true);
+      queueMicrotask(() => {
+        if (isMounted) setIsLoadingMakes(true);
+      });
       getVehicleMakes()
         .then(data => {
-          setMakesList(data || []);
+          if (isMounted) setMakesList(data || []);
         })
         .catch(err => {
           console.error('Failed to load vehicle makes from database:', err);
-          setMakesList([]);
+          if (isMounted) setMakesList([]);
         })
         .finally(() => {
-          setIsLoadingMakes(false);
+          if (isMounted) setIsLoadingMakes(false);
         });
     }
+    return () => {
+      isMounted = false;
+    };
   }, [isOpen]);
 
   // Load models from database when make changes
   useEffect(() => {
+    let isMounted = true;
     if (formData.make) {
-      setModelsList([]);
-      setIsLoadingModels(true);
       getVehicleModels(formData.make)
         .then(models => {
-          setModelsList(models || []);
+          if (isMounted) setModelsList(models || []);
         })
         .catch(err => {
           console.error('Failed to load vehicle models from database:', err);
-          setModelsList([]);
+          if (isMounted) setModelsList([]);
         })
         .finally(() => {
-          setIsLoadingModels(false);
+          if (isMounted) setIsLoadingModels(false);
         });
-    } else {
-      setModelsList([]);
     }
+    return () => {
+      isMounted = false;
+    };
   }, [formData.make]);
 
   if (!isOpen) return null;
@@ -128,6 +137,12 @@ export const LoanModal: React.FC<LoanModalProps> = ({ isOpen, onClose }) => {
   const handleMakeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const makeVal = e.target.value;
     const selectedOption = makesList.find(m => m.value === makeVal);
+    setModelsList([]);
+    if (makeVal) {
+      setIsLoadingModels(true);
+    } else {
+      setIsLoadingModels(false);
+    }
     setFormData(prev => ({
       ...prev,
       make: makeVal,
@@ -255,6 +270,7 @@ export const LoanModal: React.FC<LoanModalProps> = ({ isOpen, onClose }) => {
   const resetFormAndClose = () => {
     setShowSuccessModal(false);
     setShowWarningModal(false);
+    setModelsList([]);
     setFormData({
       name: '',
       nic: '',
@@ -271,13 +287,6 @@ export const LoanModal: React.FC<LoanModalProps> = ({ isOpen, onClose }) => {
     setFormErrors({});
     onClose();
   };
-
-  // Generate eligible registration years (current year down to 2015)
-  const currentYear = new Date().getFullYear();
-  const regYears: number[] = [];
-  for (let y = currentYear; y >= 2015; y--) {
-    regYears.push(y);
-  }
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
@@ -527,7 +536,7 @@ export const LoanModal: React.FC<LoanModalProps> = ({ isOpen, onClose }) => {
                       }`}
                     >
                       <option value="">--Select Year--</option>
-                      {regYears.map(year => (
+                      {REG_YEARS.map(year => (
                         <option key={year} value={year.toString()}>
                           {year}
                         </option>

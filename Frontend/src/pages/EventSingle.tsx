@@ -6,7 +6,6 @@ import {
   Clock, 
   ArrowLeft, 
   Newspaper, 
-  Camera, 
   Maximize2, 
   X, 
   ChevronLeft 
@@ -105,7 +104,6 @@ export const EventSingle: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
-    setLoading(true);
 
     if (id) {
       getEventById(id)
