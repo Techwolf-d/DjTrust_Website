@@ -8,6 +8,7 @@ import { Footer } from './components/Footer';
 import { LoanModal } from './components/LoanModal';
 import { FinanceModal } from './components/FinanceModal';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
+import { FloatingSocialBar } from './components/FloatingSocialBar';
 import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Leadership } from './pages/Leadership';
@@ -133,6 +134,9 @@ export default function App() {
           onClose={() => setFinanceModalOpen(false)}
           serviceType={financeServiceType}
         />
+
+        {/* Floating Social Media Sidebar */}
+        <FloatingSocialBar />
 
         {/* Global Floating Scroll-To-Top Button */}
         <ScrollToTopButton />

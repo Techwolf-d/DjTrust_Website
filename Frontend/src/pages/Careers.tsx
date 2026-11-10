@@ -18,7 +18,6 @@ import {
   Maximize2, 
   Minimize2, 
   CheckCircle2, 
-  AlertCircle,
   UploadCloud
 } from 'lucide-react';
 import { getCareers, applyForJob, uploadJobFiles, type JobItem, type JobApplicationRequest } from '../services/api';

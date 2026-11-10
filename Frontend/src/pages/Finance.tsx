@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ChevronRight, 
@@ -24,9 +24,11 @@ interface FinanceProps {
   onOpenLoanModal?: () => void;
 }
 
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS_OF_TRUST = CURRENT_YEAR - 1931;
+
 export const Finance: React.FC<FinanceProps> = ({ onOpenLoanModal }) => {
-  const currentYear = new Date().getFullYear();
-  const yearsOfTrust = currentYear - 1931;
+  const yearsOfTrust = YEARS_OF_TRUST;
 
   const benefits = [
     {

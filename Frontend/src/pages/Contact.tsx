@@ -80,7 +80,7 @@ export const Contact: React.FC = () => {
       setTimeout(() => {
         setIsSuccess(false);
       }, 6000);
-    } catch (err: any) {
+    } catch {
       setErrorMessage('Sorry, something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
